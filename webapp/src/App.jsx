@@ -1,15 +1,14 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import VideoRecorder from './components/recorder'
-import { GoogleAuthProvider, signInWithRedirect, getAuth, signOut } from "firebase/auth";
-import { initializeApp} from "firebase/app";
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, signOut } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import * as IPFS from "ipfs-core";
+import { useEffect, useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
-import './App.css'
+import './App.css';
+import VideoRecorder from './components/recorder';
 import VideoList from './components/video-list';
-import { decryptVideo, encryptVideo, generateKeys } from './functions/encryption';
+import { generateKeys } from './functions/encryption';
 
 const provider = new GoogleAuthProvider();
 initializeApp({
@@ -35,7 +34,7 @@ function App() {
   const [user, loading, error] = useAuthState(auth);
 
   const videoProps = {cid, setCid, setCidData, recording, setRecording, cidData, ipfs,
-    uploading, setUploading, recordedData, setRecordedData, db, user}
+    uploading, setUploading, recordedData, setRecordedData, db, user, keys}
 
   useEffect(()=> {
     async function go() {
@@ -79,15 +78,6 @@ function App() {
     saveKeys(_keys)
   }
 
-  const encrypt = async (data) => {
-    let encrypted = await encryptVideo('WEEEEE', keys.publicKey)
-    console.log(encrypted)
-  }
-
-  const decrypt = async (encrypted) => {
-    let decrypted = await decryptVideo(encrypted, keys.privateKey)
-    console.log(decrypted)
-  }
   
   const saveKeys = (keys) => {
     window.crypto.subtle.exportKey("jwk", keys.publicKey)
@@ -113,7 +103,7 @@ function App() {
       <h1>deDrive</h1><br/>
       {!user && !loading && !error && <button onClick={login}>Login</button>}
       {keyed && <VideoRecorder {...videoProps}/>}<br/>
-      {keyed && <VideoList {...{db, user, setCidData, ipfs}} />}<br/>
+      {keyed && <VideoList {...{db, user, setCidData, ipfs, keys}} />}<br/>
       {user && !keys &&<><button onClick={genKeys}>Generate Keys</button><br/><br/></>}
       {keyed && <h3>keys are generated and stored</h3>}
       {user && idle && <button onClick={logout}>Logout</button>}

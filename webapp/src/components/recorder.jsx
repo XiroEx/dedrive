@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Buffer } from 'buffer';
 import { doc, updateDoc, arrayUnion, } from "firebase/firestore";
+import { decryptVideo, encryptVideo } from "../functions/encryption";
 
 export default function VideoRecorder({ipfs, cid, setCid, recording, setRecording, 
-  recordedData, setRecordedData, uploading, setUploading, db, user, cidData, setCidData}) {
+  recordedData, setRecordedData, uploading, setUploading, db, user, cidData, setCidData, keys, }) {
   const [stream, setStream] = useState(null)
   const videoRef = useRef(null)
 
@@ -42,7 +43,8 @@ export default function VideoRecorder({ipfs, cid, setCid, recording, setRecordin
   };
 
   const handleSave = async () => {
-    setUploading(true);
+    setUploading(true)
+    const data = await encrypt(recordedData)
     const file = new File([recordedData], `${Date.now()}.mp4`, { type: 'video/mp4' })
     let CID
 
@@ -67,6 +69,12 @@ export default function VideoRecorder({ipfs, cid, setCid, recording, setRecordin
     setCidData(null)
     setCid(null)
   };
+
+  
+  const encrypt = async (data) => {
+    let encrypted = await encryptVideo('WEEEEE', keys.publicKey)
+    return encrypted
+  }
 
   const idle = !recordedData && !uploading && !recording && !cidData
   const srcData = recordedData ? URL.createObjectURL(recordedData) : recordedData
