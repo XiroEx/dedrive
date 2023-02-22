@@ -45,7 +45,7 @@ export default function VideoRecorder({ipfs, cid, setCid, recording, setRecordin
   const handleSave = async () => {
     setUploading(true)
     const data = await encrypt(recordedData)
-    const file = new File([recordedData], `${Date.now()}.mp4`, { type: 'video/mp4' })
+    const file = new File([data], `${Date.now()}.mp4`, { type: 'video/mp4' })
     let CID
 
     try {
@@ -56,7 +56,6 @@ export default function VideoRecorder({ipfs, cid, setCid, recording, setRecordin
         console.error(error)
     } finally {
         setUploading(false)
-        console.log(user.uid)
         const docRef = doc(db, `/users/${user.uid}`)
         await updateDoc(docRef, {
             videos: arrayUnion(CID)
@@ -72,7 +71,7 @@ export default function VideoRecorder({ipfs, cid, setCid, recording, setRecordin
 
   
   const encrypt = async (data) => {
-    let encrypted = await encryptVideo('WEEEEE', keys.publicKey)
+    let encrypted = await encryptVideo(data, keys.publicKey)
     return encrypted
   }
 
@@ -85,7 +84,6 @@ export default function VideoRecorder({ipfs, cid, setCid, recording, setRecordin
     <div>
       {((recordedData || recording) && !cidData) && <video ref={videoRef} src={srcData} autoPlay={recording} controls={!recording} muted={recording} style={idle ? {display:'none'}:{ width: "100%", height: "400px" }}></video>}
       {cidData && <video src={cidData} autoPlay/>}
-      {}
       {cid ? (
         <div>
           {uploading ? (

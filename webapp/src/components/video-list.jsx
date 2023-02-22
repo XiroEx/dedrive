@@ -10,11 +10,14 @@ export default function VideoList({db, user, setCidData, ipfs, keys}) {
 
     const loadVideo = async (cid) => {
         const chunks = []
+        console.log(cid)
         for await (const chunk of ipfs.cat(cid)) {
           chunks.push(chunk)
         }
-        const decrytped = await decrypt(chunks)
-        const blob = new Blob(chunks, { type: 'video/mp4' })
+        console.log(chunks)
+        const decrypted = await decrypt(chunks)
+        console.log(decrypted)
+        const blob = new Blob(decrypted, { type: 'video/mp4' })
         const url = URL.createObjectURL(blob)
         console.log(url)
         setCidData(url)
